@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuckeyeQueue</title>
+<link rel="stylesheet" href="./styles.css"><body>
+    <header class="navbar">
+        <div class="logo">Buckeye<span>Queue</span></div>
+
+        <nav class="nav-links">
+            <a href="#featured">Featured</a>
+            <a href="#locations">Locations</a>
+            <a href="#insights">Insights</a>
+        </nav>
+
+        <div class="live-pill">● Live Campus Updates</div>
+    </header>
+
+    <main>
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-left">
+                <p class="eyebrow">LIVE CAMPUS CROWD TRACKER</p>
+                <h1>See the crowd before you go.</h1>
+                <p class="hero-text">
+                    Track buses and dining spots across campus in real time.
+                    Avoid long waits, crowded buses, and packed food courts.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="#locations" class="btn-primary">Browse Locations</a>
+                    <a href="#insights" class="btn-secondary">View Best Times</a>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <div class="hero-card">
+                    <p class="mini-label">Live now</p>
+                    <h3 id="heroFeatureName">Traditions at Scott</h3>
+                    <p id="heroFeatureType">Campus Dining</p>
+
+                    <div class="hero-progress-row">
+                        <span id="heroFeaturePeople">340 / 400 people</span>
+                        <strong id="heroFeaturePercent">85%</strong>
+                    </div>
+
+                    <div class="progress-track large">
+                        <div id="heroFeatureBar" class="progress-fill busy"></div>
+                    </div>
+
+                    <div class="hero-status-row">
+                        <span id="heroFeatureLevel" class="status busy">Busy</span>
+                        <span id="heroFeatureBestTime">Best time: 3 PM</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROTATING FEATURED -->
+        <section class="featured-section" id="featured">
+            <div class="section-top">
+                <div>
+                    <p class="eyebrow">FEATURED RIGHT NOW</p>
+                    <h2>Popular campus locations</h2>
+                </div>
+            </div>
+
+            <div class="featured-carousel-wrapper">
+                <button class="carousel-btn" id="prevFeature">&#10094;</button>
+                <div class="featured-carousel" id="featuredCarousel"></div>
+                <button class="carousel-btn" id="nextFeature">&#10095;</button>
+            </div>
+        </section>
+
+        <!-- LOCATIONS -->
+        <section class="locations-section" id="locations">
+            <div class="section-top">
+                <div>
+                    <p class="eyebrow">EXPLORE</p>
+                    <h2>Find your next stop</h2>
+                    <p class="section-subtitle">
+                        Check live crowd levels across transportation and dining.
+                    </p>
+                </div>
+
+                <input
+                    type="search"
+                    id="searchInput"
+                    class="search-box"
+                    placeholder="Search locations..."
+                >
+            </div>
+
+            <div class="filters">
+                <button class="filter active" data-kind="all">All</button>
+                <button class="filter" data-kind="bus">Buses</button>
+                <button class="filter" data-kind="food_court">Dining</button>
+            </div>
+
+            <div class="location-grid" id="locationGrid"></div>
+        </section>
+
+        <!-- INSIGHTS / BOTTOM STATS -->
+        <section class="insights-section" id="insights">
+            <div class="section-top">
+                <div>
+                    <p class="eyebrow">CAMPUS INSIGHTS</p>
+                    <h2>Stats and best times</h2>
+                    <p class="section-subtitle">
+                        Use live trends and forecasts to make better decisions.
+                    </p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p>Locations Tracked</p>
+                    <h3 id="totalLocations">0</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Low Crowd Locations</p>
+                    <h3 id="lowCrowd">0</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Busy / Full Locations</p>
+                    <h3 id="busyCrowd">0</h3>
+                </div>
+
+                <div class="stat-card">
+                    <p>Last Updated</p>
+                    <h3 id="lastUpdated">--:--</h3>
+                </div>
+            </div>
+
+            <div class="insights-bottom">
+                <div class="best-times-panel">
+                    <h3>Best possible times to go</h3>
+                    <p class="muted">
+                        These are the lowest predicted crowd periods for each location.
+                    </p>
+                    <div id="bestTimesList" class="best-times-list"></div>
+                </div>
+
+                <div class="forecast-panel">
+                    <h3 id="forecastTitle">Select a location</h3>
+                    <p id="forecastSubtitle" class="muted">
+                        Forecast and best time will appear here.
+                    </p>
+                    <div id="forecastChart" class="forecast-chart"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <strong>BuckeyeQueue</strong>
+        <p>Built for Buckeyes. Designed to save time and reduce crowd stress.</p>
+        <small>Demo data shown for prototype use.</small>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

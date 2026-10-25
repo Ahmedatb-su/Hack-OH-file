@@ -1,72 +1,32 @@
-# BuckeyeQueue (backend)
+# BuckeyeQueue frontend
 
-Live crowd levels for campus buses (COTA/CABS) and food courts, driven by Buck ID swipes.
-Card readers report swipes → the API tracks who is inside each location → students see
-exactly how packed a bus or food court is, plus a forecast for the next few hours.
+Responsive React + Vite frontend for the BuckeyeQueue FastAPI backend. Features: browse/search campus buses and food courts; live occupancy, threshold color/status; per-location 12-hour forecast; WebSocket live updates, 30-second fallback refresh; automatic sample-data preview if backend is offline.
 
-## Quick start
+## Start
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env            # then edit the secrets
-export $(grep -v '^#' .env | xargs)
-python -m scripts.seed          # demo buses + food courts
-uvicorn app.main:app --reload
+cd buckeyequeue-frontend
+npm install
+cp .env.example .env
+npm run dev
 ```
+Open http://localhost:5173. Run your FastAPI server at http://localhost:8000 in another terminal. Vite proxies `/locations` (including websocket upgrades) to FastAPI automatically.
 
-Interactive docs: http://localhost:8000/docs  ·  Tests: `pytest`  ·  Docker: `docker build -t buckeye-queue . && docker run -p 8000:8000 --env-file .env buckeye-queue`
+For a hosted API, put `VITE_API_URL=https://api.example.com` in `.env` and enable CORS on the FastAPI server for your frontend origin. To force preview data, set `VITE_DEMO_MODE=true`.
 
-## How it works
+## Backend integration notes
 
-| Swipe | Result |
-|---|---|
-| First swipe at a location | Student is added to that location's count |
-| Second swipe at the same location | Student is removed (tap-out) |
-| Swipe at a different location | Auto-removed from the old one, added to the new one |
-| Never tapped out | Auto-expired after `STALE_MINUTES_*` so counts self-correct |
+- `GET /locations`: expected to return an array or `{locations:[...]}`. Each location should include `id`, `name`, `kind` (`bus` or `food_court`), `capacity`.
+- `GET /locations/{id}/occupancy`: typical payload `{count,capacity,percentage,level}`; alternate `current_count`/`percent_full` fields supported.
+- `GET /locations/{id}/forecast?hours=12&weeks=4`: expected array or `{forecast:[...]}`, each with an hourly timestamp and percentage. Other common names are supported by the adapter in `src/api.js`.
+- `WS /locations/{id}/live`: should push JSON payloads with current occupancy. If the payload shape differs, revise `src/api.js` and the `onUpdate` callback in `src/main.jsx`.
+- `POST /swipes` and `POST /locations` are intentionally not called by the public student dashboard because they require privileged API keys. Never ship those keys in frontend code.
 
-Buses with only a boarding reader can send `"direction": "in"`; stale expiry handles exits.
-Occupancy levels: `low` <40%, `moderate` <70%, `busy` <95%, `full` ≥95% of capacity.
+Your actual Pydantic response shapes were not provided. Update `src/api.js` field aliases if they differ. Failed forecast requests display sample forecast values; label these appropriately before production. Sample occupancy is **not real campus data**.
 
-## API
+## Production notes
 
-| Method | Path | Auth | Purpose |
-|---|---|---|---|
-| POST | `/swipes` | `X-API-Key` (reader) | Report a swipe `{location_id, buck_id, direction}` |
-| GET | `/locations?kind=bus\|food_court` | none | All locations with live counts |
-| GET | `/locations/{id}/occupancy` | none | Count, % full, level |
-| GET | `/locations/{id}/forecast?hours=12&weeks=4` | none | Expected crowd by hour (same weekday/hour history) |
-| POST | `/locations` | `X-API-Key` (admin) | Create a bus / food court |
-| WS | `/locations/{id}/live` | none | Live push on every change |
-
-```bash
-curl -X POST localhost:8000/swipes -H "X-API-Key: reader-key-1" -H "Content-Type: application/json" \
-  -d '{"location_id": 1, "buck_id": "buckeye.1"}'
-```
-
-## Privacy
-
-- Buck IDs are **HMAC-SHA256 hashed** with `ID_HASH_SECRET` immediately; raw IDs are never stored or logged.
-- Public endpoints only expose aggregate counts, never who is where.
-- Before deploying on a real campus: get approval from the university (OSU IT / Transportation & Traffic Management / COTA), review FERPA/data-retention requirements, and consider purging `swipe_events` after a short window.
-
-## Layout
-
-```
-app/
-  main.py            FastAPI app
-  models.py          Location, Presence, SwipeEvent, OccupancySnapshot
-  services/occupancy.py   swipe logic, expiry, levels, forecast
-  routers/           /swipes, /locations (+ websocket)
-  security.py        ID hashing, API-key auth
-scripts/seed.py      demo data
-tests/               pytest suite
-```
-
-## Next steps
-
-- Postgres (`DATABASE_URL=postgresql+psycopg://...`) + Alembic migrations
-- Redis pub/sub so websocket broadcasts work across multiple workers
-- Per-reader keys mapped to a fixed `location_id` (so a reader can't report for another location)
-- Time-weighted forecast / ML model; integrate COTA GTFS-realtime for bus positions
+- Run `npm run build` to produce `dist/`.
+- Ensure university and transit operator permissions before using real ID-card reader data.
+- Do not assume card-reader swipe counts represent perfectly accurate headcounts. Present them as estimates, disclose stale data, and incorporate privacy review and retention limits.
+- The current frontend intentionally has no account or admin interface.
